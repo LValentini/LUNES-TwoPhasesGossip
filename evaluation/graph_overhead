@@ -1,0 +1,98 @@
+#!/bin/bash
+###############################################################################################
+#	Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+#	Large Unstructured NEtwork Simulator (LUNES)
+#
+#	Description:
+#		"quick-and-dirty" script to collect the results obtained by the
+#		execution scripts of LUNES and to output data in file that can
+#		be used by gnuplot to generate graphs
+#
+#	Authors:
+#		First version by Gabriele D'Angelo <g.dangelo@unibo.it>
+#
+################################################################################################
+
+
+
+FILE="results-list.txt"
+RESULTS_DIRECTORY="/srv/lunes/results/"
+STEP_SIZE="0.1"
+
+# Some cleaning
+rm -f broadcast.dat fixed.dat adaptive.dat adaptive_specific.dat adaptive_sender.dat degdependent.dat
+
+##################################################################################à
+find $RESULTS_DIRECTORY -iname broadcast-STATS.dat > $FILE
+exec < $FILE
+while read LINE
+do
+echo `cat $LINE` >> broadcast.dat
+done
+
+rm -f $FILE
+
+##################################################################################à
+find $RESULTS_DIRECTORY -iname fixedprob-STATS.dat > $FILE
+exec < $FILE
+while read LINE
+do
+echo `cat $LINE` >> fixed.dat
+done
+
+rm -f $FILE
+
+##################################################################################à
+find $RESULTS_DIRECTORY -iname adaptive-STATS.dat > $FILE
+exec < $FILE
+while read LINE
+do
+echo `cat $LINE` >> adaptive.dat
+done
+
+rm -f $FILE
+
+##################################################################################à
+find $RESULTS_DIRECTORY -iname adaptive_specific-STATS.dat > $FILE
+exec < $FILE
+while read LINE
+do
+echo `cat $LINE` >> adaptive_specific.dat
+done
+
+rm -f $FILE
+
+##################################################################################à
+find $RESULTS_DIRECTORY -iname adaptive_sender-STATS.dat > $FILE
+exec < $FILE
+while read LINE
+do
+echo `cat $LINE` >> adaptive_sender.dat
+done
+
+rm -f $FILE
+
+##################################################################################à
+find $RESULTS_DIRECTORY -iname ddf1-STATS.dat > $FILE
+exec < $FILE
+while read LINE
+do
+echo `cat $LINE` >> ddf1.dat
+done
+sort -k +5n ddf1.dat > ddf1-sorted.dat
+../spacer ddf1-sorted.dat $STEP_SIZE > ddf1.dat
+rm -f $FILE ddf1-sorted.dat
+
+##################################################################################à
+find $RESULTS_DIRECTORY -iname ddf2-STATS.dat > $FILE
+exec < $FILE
+while read LINE
+do
+echo `cat $LINE` >> ddf2.dat
+done
+sort -k +5n ddf2.dat > ddf2-sorted.dat
+../spacer ddf2-sorted.dat $STEP_SIZE > ddf2.dat
+rm -f $FILE ddf2-sorted.dat
+
+##################################################################################à
+

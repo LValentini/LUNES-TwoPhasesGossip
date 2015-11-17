@@ -1,0 +1,25 @@
+###############################################################################
+		Large Unstructured NEtwork Simulator (LUNES)
+based on the Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+###############################################################################
+		
+©Copyright 2015					Gabriele D'Angelo
+	
+	Department of Computer Science and Engineering
+	University of Bologna
+
+----------------------------------------------------------------------------
+
+MAIN DEVELOPERS:
+-	Gabriele D'Angelo <g.dangelo@unibo.it>
+
+CONTRIBUTORS:
+-	Degree Dependent Gossip
+	Giulio Cirnigliaro <giulio.cirnigliaro@studio.unibo.it>
+
+BUG FIXES:
+-	Daniele Baschieri
+-	Michele Corazza
+-	Stefano Gombi	
+
+----------------------------------------------------------------------------

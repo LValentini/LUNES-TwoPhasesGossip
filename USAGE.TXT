@@ -1,0 +1,171 @@
+###############################################################################
+		Large Unstructured NEtwork Simulator (LUNES)
+based on the Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+###############################################################################
+		
+©Copyright 2015					Gabriele D'Angelo
+	
+	Department of Computer Science and Engineering
+	University of Bologna
+
+----------------------------------------------------------------------------
+
+For better usability, two different sets of shell scripts have been provided
+in this software distribution.
+
+The first set is composed of the following "runtime scripts":
+
+- sim-metrics-adaptive
+- sim-metrics-broadcast
+- sim-metrics-fixedprob
+
+The second set is composed of:
+
+- sim-metrics-adaptive-corpus
+- sim-metrics-adaptive_sender-corpus
+- sim-metrics-adaptive_specific-corpus
+- sim-metrics-fixedprob-corpus
+- sim-metrics-broadcast-corpus
+- sim-metrics-ddf1-corpus
+- sim-metrics-ddf2-corpus
+
+As obvious, each script refers to a different dissemination protocol: 
+fixed probability, probabilistic broadcast, adaptive [node] (alg. #1),
+adaptive sender (alg. #2) and adaptive specific (alg. #3).
+
+The difference between the two sets is in the testbed that will be used 
+for the execution of the dissemination protocol that has been chosen.
+In the first set at each run it will be (randomly) generated a new graph 
+that will be used for the dissemination protocol evaluation.
+
+Much more frequently it will be necessary to compare the different
+protocol outcomes in the same testbed conditions. For these reason, the
+second set of scripts will use a "corpus" that is a set of graph 
+definitions (provided in graphviz dot format) and placed in the following
+directory: "/srv/lunes/corpus"
+A few corpuses (with different construction properties) are provided in
+the same package of LUNES, in the "example-corpuses" directory.
+
+WARNING: to work correctly LUNES needs a lot of disk space for
+   	 trace files and temporary files that are used for the performance
+	 evaluation tasks. The simulator expects to find a directory
+	 called "/srv/lunes" with the appropriate permissions.
+	 This directory, such as many other settings, can be changed
+	 modifying the "scripts_configuration.sh" configuration file.
+
+The "scripts_configuration.sh" file provides all the basic configuration
+that can be modified for the performance evaluation but take care that
+this "default values" are often superseded by the specific setups that
+are placed in the runtime scripts. 
+
+----------------------------------------------------------------------------
+Description of the parameters that can be modified in the runtime scripts
+(sim-metrics-adaptive, sim-metrics-broadcast, sim-metrics-fixedprob,
+sim-metrics-adaptive-corpus, sim-metrics-adaptive_sender-corpus, 
+sim-metrics-adaptive_specific-corpus, sim-metrics-fixedprob-corpus,
+sim-metrics-broadcast-corpus,sim-metrics-ddf1-corpus,
+sim-metrics-ddf2-corpus).
+
+Note: for all the tuning aspects related to the ARTÌS/GAIA simulator
+please see its specific documentation:
+http://pads.cs.unibo.it/dokuwiki/doku.php?id=pads:gaia-apis
+
+1)	(GAIA specific)
+	MIGRATION variable, allowed settings:
+
+	MIGR_OFF		0
+	MIGR_ON			1	
+	MIGR_E1			1	legacy algorithm
+	MIGR_E2			2	new algorithm, time-based
+	MIGR_E3			3	new algorithm, event-based
+
+2)	(LUNES specific)
+	DISSEMINATION modes for new and routed messages:
+
+	BROADCAST 			0
+	GOSSIP_FIXED_PROB 		1
+	GOSSIP_FIXED_FANOUT 		2 (not implemented in this version)
+	UP_AND_DOWN			3 (not implemented in this version)
+	ADAPTIVE_GOSSIP			4 (adaptive "node", alg. #1)
+	ADAPTIVE_GOSSIP_SENDER		5 (adaptive "sender", alg. #2)
+	ADAPTIVE_GOSSIP_SPECIFIC	6 (adaptive "specific", alg. #3)
+	DEGREE_DEPENDENT_GOSSIP		7
+
+3)	(GAIA specific)
+	MFACTOR, migration factor (default value is 3)
+
+4)	(GAIA specific)
+	LOAD, load balancing control
+
+	OFF			0	
+	ON			1
+
+5)	(LUNES specific)
+	MAX_TTL, maximum time-to-live for messages in the network
+
+6)	(LUNES specific)
+	Based on the dissemination mode:
+	- 	BROADCAST: 			BROADCAST_PROB_THRESHOLD
+		probability threshold of the probabilistic broadcast dissemination
+
+	-	GOSSIP_FIXED_PROB: 		FIXED_PROB_THRESHOLD
+		probability threshold of the fixed probability dissemination
+
+	-	ADAPTIVE_GOSSIP: 		FIXED_PROB_THRESHOLD
+		all the implemented adaptive gossip dissemination algorithms are
+		based on the fixed probability dissemination with some modifications
+		(e.g. stimuli). Therefore, also this kind of algorithm uses the same
+		baseline probability threshold of the fixed probability dissemination
+	-	DEGREE_DEPENDENT_GOSSIP:	PFUNC, FUNC_COEFF
+		the Degree-dependent Dynamic Gossip is based on a probability
+		function that can be tuned using a specific coefficient. 
+		Implemented functions:
+			1	Degree Dependent Function 1
+			2	Degree Dependent Function 2	
+		More information on the functions can be found in:
+		http://arxiv.org/abs/1507.08417
+
+7)	(LUNES specific)
+	churn control: (not implemented in this version)
+		CHURN_MU	probability to move from the alive state to the death one
+				expressed as an int value in the range [0, 100]
+				example: 0 means no deaths
+
+		CHURN_LAMBDA	probability to move from the death state to the alive one
+				expressed as an int value in the range [0, 100]
+
+8)	(LUNES specific)	
+	CACHE SIZE, number of slots used to cache messages
+		warning: the max size is defined using the hard-coded constant
+			MAX_CACHE_SIZE defined in "lunes_constants.h"
+
+----------------------------------------------------------------------------
+USAGE EXAMPLE
+----------------------------------------------------------------------------
+
+Let's suppose that out goal is to design and implement a new dissemination
+protocol. First of all we will need to modify some parts of the LUNES 
+simulation model to implement the new parts and to modify the existing ones.
+
+Very likely our modifications will be limited to a few source files:
+-	lunes.c / lunes.h / lunes_constants.h
+-	user_event_handlers.c / user_event_handlers.h
+-	sim-parameters.h
+
+After implementing the protocol variant we will need to compare its outcomes
+to the existing protocols (e.g. probabilistic broadcast, fixed probability, 
+etc). A good idea would be to compare all the dissemination protocols in the 
+same environment (scenario) and therefore we will choice an appropriate 
+"corpus" of graphs from the "example-corpuses" directory and decompress 
+them in "/srv/lunes/corpus". An alternative would be to build a whole new 
+corpus using the "make-corpus" script that is provided.
+
+At this point we can use the "sim-metrics-*-corpus" scripts to evaluate the
+behavior of the "standard" dissemination protocols on this set of graphs.
+
+In the following, the same scripts can used as an example to implement the 
+one to be used to evaluate our new modified protocol. After concluding also 
+this phase, the "evaluation" directory provides some scripts and gnuplot 
+files useful to create some graphs.
+
+----------------------------------------------------------------------------

@@ -1,0 +1,113 @@
+#!/bin/bash
+
+###############################################################################################
+#	Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+#	Large Unstructured NEtwork Simulator (LUNES)
+#
+#	run-corpus
+#		version: 	0.3	14/12/10
+#
+#		original author:	Gabriele D'Angelo	<gda@cs.unibo.it>
+#
+#	description:
+#		executes LUNES on a predefined corpus of graph
+#
+#	usage:	
+#		./run <#TOT_LP> <#LP> <#IA> <#RUN> <testname> <max_diameter>
+#	
+#		mandatory input parameters = #TOT_LP #LP #IA
+#		#TOT_LP 	total number of LPs in the simulation
+#		#LP  		number of Logical Processes to execute in this host
+#		#IA		total number of interacting agents to simulate
+#				(e.g. each LP will simulate #IA / #TOT_LP devices)
+#		#RUN		number of runs to be executed
+#		<testname>
+#		<max_diameter>	max diameter of the generated graph
+#
+#		example: ./run 4 4 1000 3 <testname> 8
+#			it runs a parallel simulation composed of 4 LPs
+#			in which each LP models 250 interacting agents
+#			all the LPs will be executed in this host
+#			3 runs will be executed
+#			the results will be marked by the <testname> prefix
+#			the generated graph will have max diameter of 8
+#
+###########################################################################################
+
+#
+# Including some default configuration parameters
+#
+source scripts_configuration.sh
+
+ESC="\033["
+
+HOST="localhost"
+NLP=$1
+SLP=$2
+TOT_IA=$3
+RUN=$4
+TESTNAME=$5
+MAX_DIAMETER=$6
+
+if [ "$#" != "6" ]; then
+        echo "		  Incorrect syntax...		 "
+        echo "USAGE: $0 [#TOT_LP] [#LP] [#IA] [#RUNS] [testname]"
+        echo ""
+        exit
+fi
+
+echo "                          "
+echo "                          "
+echo -e "${ESC}29;39;1mLARGE UNSTRUCTURED NETWORKS SIMULATOR (LUNES)... ${ESC}0m"
+
+# Some cleaning
+rm -f *.finished
+
+# Partitioning the #IA among all the available LPs
+IA=$((TOT_IA/NLP))
+
+TOT_RUNS=$RUN
+# Executing the simulation runs
+while [ $RUN -gt 0 ]
+do
+	mkdir -p $TRACE_DIRECTORY/$TESTNAME/$RUN/
+
+       	echo -e "${ESC}29;39;1mGenerating the network graph ... ${ESC}0m"
+	cp "$CORPUS_DIRECTORY/test-graph-cleaned-$RUN.dot" "$TRACE_DIRECTORY/$TESTNAME/$RUN/"test-graph-cleaned.dot
+	echo "				"
+
+	# SImulation MAnager (SIMA) execution	
+	if [ $HOST == $HOSTNAME -o $HOST == "localhost" ]; 
+	then
+        	echo "                             "
+        	echo -e "${ESC}29;39;1mStarting SIMA $NLP ... ${ESC}0m"
+        	./sima $NLP &
+	fi
+
+	# LPs execution
+	X=0
+	while [ $X -lt $SLP ]
+	do
+		echo ">>> Executing RUN: $RUN, LP: $X"
+
+	        echo -e "${ESC}41;37;2m[LP_$X]${ESC}0m ${ESC}29;39;1mStarting mig-agents $X ${ESC}0m ${ESC}39;33m ${ESC}0m ${ESC}39;33m  ${ESC}0m ..."
+
+	        time ./mig-agents	$NLP $IA $RUN "$TRACE_DIRECTORY/$TESTNAME/$RUN/" \
+			>$TRACE_DIRECTORY/$TESTNAME/$RUN/$X.out 2> $TRACE_DIRECTORY/$TESTNAME/$RUN/$X.err \
+			&&	echo -e "${ESC}41;37;2m[$X OK]${ESC}0m" &
+
+	        X=$((X+1))
+	done
+	
+	FINISHED=`ls -la . | grep ".finished" | wc -l`
+	while [ $FINISHED -lt $NLP ]; do
+		sleep 3
+		FINISHED=`ls -la . | grep ".finished" | wc -l`
+	done
+
+	# Some cleaning
+	rm -f *.finished
+
+        RUN=$((RUN-1))
+done
+

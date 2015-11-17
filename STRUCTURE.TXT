@@ -1,0 +1,105 @@
+###############################################################################
+		Large Unstructured NEtwork Simulator (LUNES)
+based on the Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+###############################################################################
+		
+©Copyright 2015					Gabriele D'Angelo
+	
+	Department of Computer Science and Engineering
+	University of Bologna
+
+----------------------------------------------------------------------------
+
+AUTHORS.TXT				LUNES authors and contributors
+
+artis_mpi.ini				ARTÌS component
+
+entity_definition.h			LUNES main component
+
+evaluation/				scripts for data collecting and 
+					performance evaluation
+
+example-corpuses/			LUNES, performance evaluation
+					Some graphs that can be used as testbed
+
+get_coverage_next.c			LUNES, performance evaluation
+
+get_coverage_script			LUNES, performance evaluation
+
+get_ids_next.c				LUNES, performance evaluation
+
+graphgen.c				LUNES, creation of graph topologies using
+					external libraries such as igraph or
+					internal functions
+
+INSTALLATION.TXT			Documentation
+
+LICENSE.TXT				Documentation
+
+lunes.c					LUNES main component
+
+lunes_constants.h			LUNES main component
+
+lunes.h					LUNES main component
+
+make-corpus				LUNES, creation of graph "corpuses"
+					based on "graphgen.c"
+
+Makefile				//
+
+mean.awk				LUNES, performance evaluation
+
+mig-agents.c				LUNES main component
+
+mig-agents.ini				LUNES main component
+
+msg_definition.h			LUNES main component
+
+Rand.seed				ARTÌS component
+
+README.TXT				Documentation
+
+run					LUNES, script to launch simulator runs
+					mainly used by more complex scripts
+
+run-corpus				LUNES, script to launch simulator runs
+					mainly used by more complex scripts
+
+scripts_configuration.sh		LUNES, performance evaluation
+
+sima.c					ARTÌS component
+
+sima.ini				ARTÌS component
+
+sim-metrics-adaptive			LUNES, performance evaluation high level scripts
+sim-metrics-adaptive-corpus					"
+sim-metrics-adaptive_sender-corpus				"
+sim-metrics-adaptive_specific-corpus				"
+sim-metrics-broadcast						"
+sim-metrics-broadcast-corpus					"
+sim-metrics-fixedprob						"
+sim-metrics-fixedprob-corpus					"
+sim-metrics-ddf1-corpus						"
+sim-metrics-ddf2-corpus						"
+
+sim-parameters.h			LUNES main component
+
+spacer.c				Utility, used by "evaluation/" scripts
+
+STRUCTURE.TXT				This file
+
+USAGE.TXT				Documentation
+
+VERSION.TXT				Documentation
+
+user_event_handlers.c			LUNES main component
+
+user_event_handlers.h			LUNES main component
+
+utils.c					LUNES main component
+
+utils.h					LUNES main component
+
+----------------------------------------------------------------------------
+
+

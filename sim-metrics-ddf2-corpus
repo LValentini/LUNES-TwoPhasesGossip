@@ -1,0 +1,166 @@
+#!/bin/bash
+###############################################################################################
+#	Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+#	Large Unstructured NEtwork Simulator (LUNES)
+#
+#	Description:
+#		script used to start simulation batches, most of the runtime parameters can
+#		be controlled using some environment variables. Such parameters can be used
+#		to control both the runtime execution and the model level paramters.
+#
+#	Note:
+#		some "default" runtime parameters are defined in "scripts_configuration.sh"
+#		and can be superseded here.
+#
+#	Authors:
+#		First version by Gabriele D'Angelo <g.dangelo@unibo.it>
+#
+################################################################################################
+
+#-------------------------------- DEFAULT VALUES ---------------------------------#
+#
+# Including some default configuration parameters
+#
+source scripts_configuration.sh
+#
+export MIGRATION=0
+export MFACTOR=1.2
+export LOAD=0
+#
+#
+export DISSEMINATION=7
+PREFIX=ddf2
+#
+# Maximum time-to-live for messages in the network
+export MAX_TTL=16
+#
+# Dissemination function and coefficient
+PFUNC="2"
+FUNC_COEFF_HIGHER="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
+FUNC_COEFF_LOWER="00 10 20 30 40 50 60 70 80 90"
+#
+# Churn control (not implemented in this version)
+export CHURN_MU=0
+export CHURN_LAMBDA=0
+#
+# Cache size
+export CACHE_SIZE=256
+
+#---------------------------------------------------------------------------------#
+
+for fcoeff_higher in $FUNC_COEFF_HIGHER
+do
+	for fcoeff_lower in $FUNC_COEFF_LOWER
+	do
+		export PROBABILITY_FUNCTION=$PFUNC
+		export FUNCTION_COEFFICIENT="$fcoeff_higher.$fcoeff_lower"
+
+		NODES=$START_NUMBER_NODES
+
+		while [ $NODES -le $END_NUMBER_NODES ]; do
+
+			rm -f $WORKING_DIRECTORY/$RUNSCOVERAGETMP $WORKING_DIRECTORY/$RUNSDELAYMEANTMP
+			rm -f $WORKING_DIRECTORY/*.finished
+			#---------------------------------------------------------------------------------#
+
+			TESTNAME="$PREFIX-$NODES-lp$LPS-migr$MIGRATION-prob$FUNCTION_COEFFICIENT-mfactor$MFACTOR-load$LOAD"
+			date
+
+			OUTPUT_FILE="$RESULTS_DIRECTORY/$TESTNAME/$PREFIX-STATS.dat"
+			rm -f $OUTPUT_FILE
+
+			if [ $EXECUTION -eq 1 ] ; then
+
+				echo "running task... $TESTNAME"
+				./run-corpus $LPS $LPS $NODES $NUMBERRUNS $TESTNAME $MAX_TTL
+
+				echo "task completed: $TESTNAME" 
+			fi
+	
+			if [ $STATISTICS -eq 1 ] ; then
+
+				echo "Processing: " $NODES	
+				RUN=1
+
+				RUNNING=0
+				while [ $RUN -le $NUMBERRUNS ]; do
+
+					RUNNING=`ps aux 2> /dev/null | grep "get_coverage_script" | wc -l`
+					echo $RUN / $RUNNING
+
+					if [ $RUNNING -le $CPUNUM ]; then
+						mkdir -p $RESULTS_DIRECTORY/$TESTNAME/$RUN
+						$IONICE ./get_coverage_script "$TRACE_DIRECTORY/$TESTNAME/$RUN" $RUN $TESTNAME $LPS &
+						let RUN=RUN+1
+					else
+						sleep 3
+					fi
+				done
+	
+				FINISHED=`ls -la $WORKING_DIRECTORY/$TESTNAME/ 2> /dev/null | grep ".finished" | wc -l`
+				while [ $FINISHED -lt $NUMBERRUNS ]; do
+					sleep 5
+					FINISHED=`ls -la $WORKING_DIRECTORY/$TESTNAME/ 2> /dev/null | grep ".finished" | wc -l`
+				done
+
+				echo -n $NODES " " >> $OUTPUT_FILE
+				echo -en "\t" >> $OUTPUT_FILE
+
+				RUN=1
+				while [ $RUN -le $NUMBERRUNS ]; do
+					$IONICE cat $WORKING_DIRECTORY/$TESTNAME/$RUN/$RUNSCOVERAGETMP >> $WORKING_DIRECTORY/$TESTNAME/$RUNSCOVERAGETMP
+					$IONICE cat $WORKING_DIRECTORY/$TESTNAME/$RUN/$RUNSDELAYTMP >> $WORKING_DIRECTORY/$TESTNAME/$RUNSDELAYTMP
+
+					let RUN=RUN+1 
+				done
+
+				RUN=1
+				while [ $RUN -le $NUMBERRUNS ]; do
+
+					LP=0
+					while [ $LP -lt $LPS ]; do
+
+						tail $TRACE_DIRECTORY/$TESTNAME/$RUN/tracefile-messages-$LP.trace | grep "M" | cut -f 2 -d" " \
+							>> $WORKING_DIRECTORY/$TESTNAME/$RUN/tracefile-messages.trace
+				
+						let LP=LP+1
+					done
+
+					RUN_MSG=`awk '{tot=tot+$1} END {print tot}' $WORKING_DIRECTORY/$TESTNAME/$RUN/tracefile-messages.trace`
+					echo $RUN_MSG >> $WORKING_DIRECTORY/$TESTNAME/$RUNSMESSAGETMP
+
+					NUM_MSGIDS=`wc -l $WORKING_DIRECTORY/$TESTNAME/$RUN/$MSGIDS | cut -f 1 -d" "`
+					LOWER_BOUND_MESSAGES=$((NODES*NUM_MSGIDS))
+
+					RATIO=`echo "scale=2; $RUN_MSG/$LOWER_BOUND_MESSAGES" | bc -l`
+					echo $RATIO >> $WORKING_DIRECTORY/$TESTNAME/ratios.trace
+
+					let RUN=RUN+1 
+				done
+			
+				VALUE=`awk -f mean.awk $WORKING_DIRECTORY/$TESTNAME/$RUNSCOVERAGETMP`
+				echo -n $VALUE >> $OUTPUT_FILE
+				echo -en "\t" >> $OUTPUT_FILE
+		
+				VALUE=`awk -f mean.awk $WORKING_DIRECTORY/$TESTNAME/$RUNSDELAYTMP`
+				echo -en "\t" $VALUE >> $OUTPUT_FILE
+
+				MESSAGES=`awk -f mean.awk $WORKING_DIRECTORY/$TESTNAME/$RUNSMESSAGETMP` 
+				echo -en "\t" $MESSAGES >> $OUTPUT_FILE
+
+				AVERAGE_RATIO=`awk -f mean.awk $WORKING_DIRECTORY/$TESTNAME/ratios.trace`
+				echo -en "\t" $AVERAGE_RATIO >> $OUTPUT_FILE
+
+				echo -en "\t" $CACHE_SIZE >> $OUTPUT_FILE
+				echo -en "\t" $MAX_TTL >> $OUTPUT_FILE
+			fi
+
+			if [ $NOTRACE -eq 1 ] ; then
+				rm -fr $WORKING_DIRECTORY/$TESTNAME/
+				rm -fr $TRACE_DIRECTORY/$TESTNAME/
+			fi
+
+			let NODES=NODES+STEP_NODES
+		done
+	done
+done

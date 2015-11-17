@@ -1,0 +1,47 @@
+#!/bin/bash
+###############################################################################################
+#	Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+#	Large Unstructured NEtwork Simulator (LUNES)
+#
+#	Description:
+#		TODO
+#
+#	Authors:
+#		First version by Gabriele D'Angelo <g.dangelo@unibo.it>
+#
+################################################################################################
+
+
+#-------------------------------- DEFAULT VALUES ---------------------------------#
+#
+# Including some default configuration parameters
+#
+source ../scripts_configuration.sh
+
+##################################################################################à
+
+# For each file in the corpus directory
+for file in $CORPUS_DIRECTORY/test-graph-cleaned-*; do
+
+	# The graph is undirected and so for every edge I've to consider both vertices
+	cat $file | awk '{print $1}' > $WORKING_DIRECTORY/1_term.txt
+	cat $file | awk '{print $3}' | cut -d';' -f 1 > $WORKING_DIRECTORY/2_term.txt
+
+	cat $WORKING_DIRECTORY/1_term.txt $WORKING_DIRECTORY/2_term.txt > $WORKING_DIRECTORY/connected_nodes.txt
+
+	# Total number of nodes 
+	NODES=`cat $WORKING_DIRECTORY/connected_nodes.txt | sort | uniq | wc -l`
+
+	# Total number of edges
+	EDGES=`cat $file | grep "\-\-" | wc -l`
+
+	# Print out all the results
+	echo $file, linked nodes: $NODES, total edges: $EDGES
+
+done
+
+# Cleaning
+rm -f $WORKING_DIRECTORY/1_term.txt $WORKING_DIRECTORY/2_term.txt $WORKING_DIRECTORY/connected_nodes.txt
+
+##################################################################################à
+

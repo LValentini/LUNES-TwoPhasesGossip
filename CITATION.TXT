@@ -1,0 +1,18 @@
+To cite the *** LUNES *** software please use:
+
+  Gabriele D'Angelo, Stefano Ferretti.
+  LUNES: Agent-based Simulation of P2P Systems. 
+  Proceedings of the International Workshop on Modeling and Simulation of Peer-to-Peer Architectures and Systems (MOSPAS 2011).
+  Istanbul (Turkey), IEEE, July 2011. ISBN 978-1-61284-382-7
+
+If you use BibTeX for LaTeX, please use:
+
+@inproceedings{gda-mospas-11,
+  author = {D'Angelo, Gabriele and Ferretti, Stefano},
+  title = {{LUNES}: Agent-based Simulation of {P2P} Systems},
+  booktitle = {Proceedings of the International Workshop on Modeling and Simulation of Peer-to-Peer Architectures and Systems (MOSPAS 2011)},
+  year = {2011},
+  isbn = {978-1-61284-382-7},
+  location = {Istanbul, turkey},
+  publisher = {IEEE}
+}

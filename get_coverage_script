@@ -1,0 +1,61 @@
+#!/bin/bash
+###############################################################################################
+#	Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+#	Large Unstructured NEtwork Simulator (LUNES)
+#
+#	Description:
+#		Used to calculate the average coverage obtained during a simulation run,
+#		furthermore it calculates also the delay (in hops) of each message
+#		dissemination.
+#
+#	Input parameters:
+#		NODES	file contenente gli identificativi dei nodi
+#		MSGIDS	file contenente gli identificativi dei messaggi generati
+#		$1 directory where are stored the traces of the simulaton run
+#		$2 number of the simulation run
+#		$3 testname, conventional name assigned to this test
+#		$4 total number of LPs in each run
+#
+#	Authors:
+#		First version by Gabriele D'Angelo <g.dangelo@unibo.it>
+#
+################################################################################################
+
+#
+# including some configuration parameters
+#
+source scripts_configuration.sh
+
+SIMTRACEDIR=$1
+RUNS=$2
+TESTNAME=$3
+LPS=$4
+
+CURDIR=$PWD
+rm -fr $WORKING_DIRECTORY/$TESTNAME/$RUNS
+mkdir -p $WORKING_DIRECTORY/$TESTNAME/$RUNS
+cd $WORKING_DIRECTORY/$TESTNAME/$RUNS
+
+# First of all I've to find what are the message IDs generated in the 
+# simulation run and the IDs of all nodes
+$CURDIR/./get_ids_next $SIMTRACEDIR "STAT_msg_ids.txt" "STAT_nodes_ids.txt" $LPS
+
+rm -f $OUTPUT
+
+NUM_NODES=`wc -l $NODES | cut -f 1 -d" "`
+NUM_MSGIDS=`wc -l $MSGIDS | cut -f 1 -d" "`
+
+echo "get_coverage - processing traces in directory: $SIMTRACEDIR"
+
+$CURDIR/./get_coverage_next \
+$NUM_NODES \
+$NUM_MSGIDS \
+$MSGIDS \
+$SIMTRACEDIR \
+$WORKING_DIRECTORY/$TESTNAME/$RUNS/$RUNSCOVERAGETMP \
+$WORKING_DIRECTORY/$TESTNAME/$RUNS/$RUNSDELAYTMP \
+$RESULTS_DIRECTORY/$TESTNAME/$RUNS/$DISTRIBUTION \
+$LPS
+
+touch $WORKING_DIRECTORY/$TESTNAME/$RUN/$TESTNAME-$RUNS.finished
+

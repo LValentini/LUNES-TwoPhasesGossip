@@ -1,0 +1,35 @@
+###############################################################################
+		Large Unstructured NEtwork Simulator (LUNES)
+based on the Advanced RTI System, ARTÌS			http://pads.cs.unibo.it
+###############################################################################
+		
+©Copyright 2015					Gabriele D'Angelo
+	
+	Department of Computer Science and Engineering
+	University of Bologna
+
+----------------------------------------------------------------------------
+
+> LUNES version 1.0 "Longyearbyen" based on ARTÌS version 2.1.0
+	- degree dependent gossip
+	- few minor bugfixes
+	- reduced the memory usage needed for computing the evaluation
+		metrics on the dissemination traces
+	- minor change in the dissemination trace format
+
+> LUNES version 0.0.1c "Outram Park" based on ARTÌS version 2.1.0
+	- fixed a bunch of warnings/compilation errors in the
+		versions of gcc
+
+> LUNES version 0.0.1b "Dies Lunae" based on ARTÌS version 2.0.2
+	- fixed a configuration error, the TRACE_DISSEMINATION is 
+		now default ON (as needed by the protocols evaluation)
+
+> LUNES version 0.0.1a "Dies Lunae" based on ARTÌS version 2.0.2
+	- added a smallfix to the LUNES Makefile
+	- updated copyright information
+
+> LUNES version 0.0.1 "Dies Lunae" based on ARTÌS version 2.0.0
+
+----------------------------------------------------------------------------
+
